@@ -8,6 +8,10 @@ from shutil import rmtree
 from flask import Flask, request, Response, abort, render_template
 from werkzeug.datastructures import FileStorage
 
+from pyvirtualdisplay import Display
+
+Display().start()
+
 from .pdf_generator import process
 
 
@@ -31,7 +35,7 @@ def generate():
     logger.info(f'Connection from ip: {request.remote_addr}')
 
     if file is None:
-        logger.warning(f'File not exists in request')
+        logger.warning('File not exists in request')
         abort(500)
 
     rnd = randint(1000000, 2000000)
@@ -75,7 +79,3 @@ def generate():
             pass
 
         abort(500)
-
-
-if __name__ == '__main__':
-    app.run('127.0.0.1', '8082')
