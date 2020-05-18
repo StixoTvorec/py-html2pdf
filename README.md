@@ -22,5 +22,5 @@ python debug.py --bind 127.0.0.1:8082 --debug
 #### Then
 
 ```bash
-curl -F "html=@archive.zip" http://127.0.0.1:8082 -o out.pdf
+curl -X POST -F "html=@archive.zip" http://127.0.0.1:8082 -o out.pdf
 ```
