@@ -49,5 +49,6 @@ def process(url: str, timeout: int = 5):
         p.join(timeout)
 
         return data
-    except Exception:
+    except Exception as e:
+        print(e)
         return None

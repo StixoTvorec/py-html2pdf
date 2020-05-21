@@ -1,4 +1,4 @@
-from app import app
+from app.server import app
 from argparse import ArgumentParser
 
 _args = ArgumentParser()

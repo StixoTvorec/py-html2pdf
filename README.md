@@ -12,7 +12,7 @@ source venv/bin/activate
 
 pip install -r requirements.txt
 
-gunicorn --bind 127.0.0.1:8082 --threads 4 app:app
+gunicorn --bind 127.0.0.1:8082 --threads 4 app.server:app
 
 # or (for develop)
 
