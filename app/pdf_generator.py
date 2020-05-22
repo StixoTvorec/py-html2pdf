@@ -1,7 +1,7 @@
 import sys
 from base64 import decodebytes, encodebytes
-from multiprocessing import Process, Queue
 from logging import error
+from multiprocessing import Process, Queue
 
 from PyQt5 import QtCore, QtWidgets, QtWebEngineWidgets
 
@@ -46,7 +46,8 @@ def process(url: str, timeout: int = 5):
         p = Process(target=_process, args=(url, queue, ))
 
         p.start()
-        data = decodebytes(queue.get())
+        _data = queue.get()
+        data = decodebytes(_data)
         p.join(timeout)
 
         return data

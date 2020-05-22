@@ -1,5 +1,6 @@
-from app.server import app
 from argparse import ArgumentParser
+
+from app.server import app
 
 _args = ArgumentParser()
 _args.add_argument('-b', '--bind', help='Bind url', default='127.0.0.1:8082')
