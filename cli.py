@@ -5,6 +5,7 @@ from pathlib import Path
 from re import compile
 from threading import Thread
 from typing import List
+from tempfile import _get_candidate_names
 
 from app.pdf_generator import process
 
@@ -33,9 +34,21 @@ def process_one_file(file: Path, dst: Path):
         warning(f'Path {file} is not file')
         return
 
+    names = _get_candidate_names()
+
     file = file.absolute()
+
     pdf_filename = f'{RE.search(file.name).group(1)}.pdf'
-    pdf_path = dst.joinpath(pdf_filename)
+
+    while True:
+        pdf_path = dst.joinpath(pdf_filename)
+
+        if not pdf_path.is_file():
+            break
+
+        pdf_filename = f'{RE.search(file.name).group(1)}~{next(names)}.pdf'
+
+
 
     data = process(f'file://{file}')
 
@@ -59,7 +72,6 @@ def main(files: List[Path], dst: Path):
             # while True:
             process_one_file(*self.queue.get())
             tq and tq.update()
-            print(123)
             self.queue.task_done()
 
     queue = Queue()

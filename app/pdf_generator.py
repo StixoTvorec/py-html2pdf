@@ -1,6 +1,7 @@
 import sys
 from base64 import decodebytes, encodebytes
 from multiprocessing import Process, Queue
+from logging import error
 
 from PyQt5 import QtCore, QtWidgets, QtWebEngineWidgets
 
@@ -50,5 +51,5 @@ def process(url: str, timeout: int = 5):
 
         return data
     except Exception as e:
-        print(e)
+        error(e)
         return None
