@@ -42,9 +42,9 @@ def generate():
 
     if file is None:
         logger.warning('File not exists in request')
-        abort(500)
+        return abort(500, 'File not exists in request')
 
-    rnd = randint(1000000, 2000000)
+    rnd = randint(1_000_000, 9_999_999)
     rnd_dir = f'dir_archive_{rnd}'
 
     logger.info(f'Processing {rnd}')
@@ -67,7 +67,7 @@ def generate():
         rmtree(str(temp_extracted))
 
         if data is None:
-            return abort(400, 'Failed to generate pdf')
+            return abort(400, 'Failed to generate pdf (empty data)')
 
         return Response(data, headers={
             'Content-Type': 'application/pdf',
@@ -81,4 +81,4 @@ def generate():
         except:
             pass
 
-        abort(500)
+        return abort(500, 'Internal server error')
