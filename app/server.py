@@ -29,9 +29,14 @@ except FileNotFoundError:
 temp_dir.mkdir(exist_ok=True)
 
 
-@app.route('/', methods=['GET'], )
+@app.route('/', methods=['GET'])
 def index_page():
     return Response(render_template('index.html'), status=418)
+
+
+@app.route('/health', methods=['GET'])
+def health():
+    return Response('Ok')
 
 
 @app.route('/', methods=['POST'])

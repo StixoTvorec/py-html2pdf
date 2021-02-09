@@ -1,5 +1,5 @@
-Flask==1.1.2
-PyQt5==5.14.2
-PyQtWebEngine==5.14.0
-gunicorn==20.0.4
-PyVirtualDisplay==0.2.5
+Flask~=1.1
+PyQt5~=5.15
+PyQtWebEngine~=5.15
+gunicorn~=20.0
+PyVirtualDisplay~=2.0
