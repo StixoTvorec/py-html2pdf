@@ -3,3 +3,4 @@
 /venv/
 /var/
 __pycache__/
+/app.log

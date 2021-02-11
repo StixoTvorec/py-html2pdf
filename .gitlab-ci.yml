@@ -1,0 +1,15 @@
+stages:
+  - make_archive
+
+pdf_maker_util:
+  stage: make_archive
+  image: alpine
+  script:
+    - echo "ok"
+  artifacts:
+    paths:
+      - app
+      - cli.py
+      - debug.py
+      - config.yml
+      - requirements.txt

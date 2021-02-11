@@ -1,22 +1,33 @@
 import os
 import zipfile
-from logging import Logger
+from logging import getLogger
 from pathlib import Path
 from random import randint
 from shutil import rmtree
+from yaml import safe_load
 
-from flask import Flask, request, Response, abort, render_template
+from flask import Flask, request, Response, abort
 from pyvirtualdisplay import Display
 from werkzeug.datastructures import FileStorage
 
 Display().start()
 
+from .meta import version
 from .pdf_generator import process
+from ._logger import init as init_logger
+
+
+try:
+    with open('config.yml', 'rb') as r:
+        config = safe_load(r)
+except FileNotFoundError:
+    config = {}
+
+logger = init_logger(config.get('log_level', ''), config.get('log_file', ''))
 
 
 app = Flask('app')
 app.debug = bool(os.environ.get("DEBUG"))
-logger = app.logger  # type: Logger
 
 temp_dir = Path(__file__).parent.parent.joinpath('var')
 
@@ -31,12 +42,17 @@ temp_dir.mkdir(exist_ok=True)
 
 @app.route('/', methods=['GET'])
 def index_page():
-    return Response(render_template('index.html'), status=418)
+    return Response('Not found', status=404)
 
 
 @app.route('/health', methods=['GET'])
 def health():
     return Response('Ok')
+
+
+@app.route('/version', methods=['GET'])
+async def get_version():
+    return Response(version)
 
 
 @app.route('/', methods=['POST'])
@@ -47,7 +63,7 @@ def generate():
 
     if file is None:
         logger.warning('File not exists in request')
-        return abort(500, 'File not exists in request')
+        return abort(400, 'File not exists in request')
 
     rnd = randint(1_000_000, 9_999_999)
     rnd_dir = f'dir_archive_{rnd}'
@@ -63,6 +79,7 @@ def generate():
         archive = zipfile.ZipFile(file)
 
         if 'index.html' not in archive.namelist():
+            logger.info(f'Failed to generate pdf "{rnd}" (empty data)')
             return abort(400, 'Index file not found')
 
         archive.extractall(str(temp_extracted))
@@ -72,6 +89,7 @@ def generate():
         rmtree(str(temp_extracted))
 
         if data is None:
+            logger.info(f'Failed to generate pdf "{rnd}" (empty data)')
             return abort(400, 'Failed to generate pdf (empty data)')
 
         return Response(data, headers={

@@ -1,11 +1,17 @@
 import sys
 from base64 import decodebytes, encodebytes
 from logging import error
+from logging import getLogger
 from multiprocessing import Process, Queue
 
 from PyQt5 import QtCore, QtWidgets, QtWebEngineWidgets
 
+from ._logger import logger_name
+
 __all__ = ['process']
+
+
+logger = getLogger(logger_name)
 
 
 def _generate_pdf(url: str, callback: callable):
@@ -37,10 +43,14 @@ def process(url: str, timeout: int = 5):
 
     def _process(url: str, queue: Queue):
 
+        logger.info('Generate "{}": start'.format(url))
+
         def writer(data):
             queue.put(encodebytes(data))
 
         _generate_pdf(url, writer)
+
+        logger.info('Generate "{}": stop'.format(url))
 
     try:
         p = Process(target=_process, args=(url, queue, ))
@@ -53,4 +63,7 @@ def process(url: str, timeout: int = 5):
         return data
     except Exception as e:
         error(e)
+
+        logger.error('pdf_generator.process error: {}'.format(*e.args))
+
         return None

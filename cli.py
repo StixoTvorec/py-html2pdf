@@ -1,26 +1,52 @@
 from argparse import ArgumentParser
-from logging import warning, error, info
 from pathlib import Path
 from queue import Queue
 from re import compile
 from tempfile import _get_candidate_names
 from threading import Thread
 from typing import List
+from yaml import safe_load
 
 from app.pdf_generator import process
+from app._logger import init as init_logger
+from app.meta import version
 
 _args = ArgumentParser()
 _args.add_argument('-i', '--input', help="Read html's list into file. Each line is html file!", type=str, default=None)
 _args.add_argument('html', type=str, nargs='*', help='Path to html file')
 _args.add_argument('-d', '--destination', help='Destination directory', type=str, default='.')
 _args.add_argument('-c', '--concurrency', help='Max parallel processing threads', default=2, type=int)
+_args.add_argument('-V', '--version', action='version', version=version)
 
 RE = compile(r'^(.+)\.html?$')
 
 
+try:
+    from tqdm import tqdm
+except ImportError:
+    class tqdm:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def update(self, *args, **kwargs):
+            pass
+
+        def close(self, *args, **kwargs):
+            pass
+
+
+try:
+    with open('config.yml', 'rb') as r:
+        config = safe_load(r)
+except FileNotFoundError:
+    config = {}
+
+logger = init_logger(config.get('log_level', ''), config.get('log_file', ''))
+
+
 def process_one_file(file: Path, dst: Path, idx, *args):
     if not file.is_file():
-        warning(f'Path {file} is not a file')
+        logger.warning(f'Path {file} is not a file')
         return
 
     names = _get_candidate_names()
@@ -35,12 +61,12 @@ def process_one_file(file: Path, dst: Path, idx, *args):
         if not pdf_path.is_file():
             break
 
-    info('{}:{}'.format(idx, file))
+    logger.info('{}:{}'.format(idx, file))
 
     data = process(f'file://{file}')
 
     if data is None:
-        warning(f'Data is none for file {file}')
+        logger.warning(f'Data is none for file {file}')
         return
 
     pdf_path.write_bytes(data)
@@ -59,8 +85,9 @@ def main(files: List[Path], dst: Path):
             while True:
                 try:
                     process_one_file(*self.queue.get())
+                    progress.update()
                 except Exception as e:
-                    error(e)
+                    logger.error(e)
 
                 self.queue.task_done()
 
@@ -75,6 +102,7 @@ def main(files: List[Path], dst: Path):
         queue.put((file, dst, idx))
 
     queue.join()
+    progress.close()
 
 
 def files_from_file(file: Path):
@@ -94,10 +122,12 @@ if __name__ == '__main__':
     files_count = len(files)
 
     if files_count < 1:
-        warning('Html files list is empty')
+        logger.warning('Html files list is empty')
         exit(1)
 
     dst = Path(args.destination)
     dst.mkdir(parents=True, exist_ok=True)
+
+    progress = tqdm(total=files_count)
 
     main(files, dst)
