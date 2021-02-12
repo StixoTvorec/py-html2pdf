@@ -1,17 +1,16 @@
 import sys
 from base64 import decodebytes, encodebytes
 from logging import error
-from logging import getLogger
 from multiprocessing import Process, Queue
 
 from PyQt5 import QtCore, QtWidgets, QtWebEngineWidgets
 
-from ._logger import logger_name
+from ._logger import get_logger
 
 __all__ = ['process']
 
 
-logger = getLogger(logger_name)
+logger = get_logger()
 
 
 def _generate_pdf(url: str, callback: callable):

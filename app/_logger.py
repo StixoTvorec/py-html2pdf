@@ -2,9 +2,11 @@ from logging import getLogger, Formatter, StreamHandler, FileHandler, DEBUG, INF
 from pathlib import Path
 from sys import stderr
 
-__all__ = ['init', 'config_logger', 'get_log_level', 'logger_name']
+__all__ = ['init', 'config_logger', 'get_log_level', 'get_logger']
 
-logger_name = 'pdf_generator'
+
+def get_logger():
+    return getLogger('pdf_generator')
 
 
 def init(max_level, file: str = ''):
@@ -24,7 +26,8 @@ def get_log_level(level: str) -> int:
 
 
 def config_logger(max_level: int, file: str = ''):
-    logger = getLogger(logger_name)
+    logger = get_logger()
+    logger.setLevel(DEBUG)
 
     formatter = Formatter('%(asctime)s:%(name)s - %(levelname)s - %(message)s')
 
