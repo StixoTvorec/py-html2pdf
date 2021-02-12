@@ -1,6 +1,5 @@
 import os
 import zipfile
-from logging import getLogger
 from pathlib import Path
 from random import randint
 from shutil import rmtree
@@ -51,7 +50,7 @@ def health():
 
 
 @app.route('/version', methods=['GET'])
-async def get_version():
+def get_version():
     return Response(version)
 
 
