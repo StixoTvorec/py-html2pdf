@@ -1,9 +1,9 @@
 import os
 import zipfile
 from pathlib import Path
-from random import randint
 from shutil import rmtree
 from yaml import safe_load
+import nanoid
 
 from flask import Flask, request, Response, abort
 from pyvirtualdisplay import Display
@@ -15,7 +15,6 @@ from .meta import version
 from .pdf_generator import process
 from ._logger import init as init_logger
 
-
 try:
     with open('config.yml', 'rb') as r:
         config = safe_load(r)
@@ -24,19 +23,15 @@ except FileNotFoundError:
 
 logger = init_logger(config.get('log_level', ''), config.get('log_file', ''))
 
-
 app = Flask('app')
 app.debug = bool(os.environ.get("DEBUG"))
 
 temp_dir = Path(__file__).parent.parent.joinpath('var')
 
-try:
-    for _item in temp_dir.iterdir():
-        rmtree(str(_item))
-except FileNotFoundError:
-    pass
+for _item in temp_dir.iterdir():
+    rmtree(str(_item), ignore_errors=True)
 
-temp_dir.mkdir(exist_ok=True)
+temp_dir.mkdir(exist_ok=True, parents=True)
 
 
 @app.route('/', methods=['GET'])
@@ -44,7 +39,7 @@ def index_page():
     return Response('Not found', status=404)
 
 
-@app.route('/health', methods=['GET'])
+@app.route('/health', methods=['GET', 'HEAD'])
 def health():
     return Response('Ok')
 
@@ -64,7 +59,7 @@ def generate():
         logger.warning('File not exists in request')
         return abort(400, 'File not exists in request')
 
-    rnd = randint(1_000_000, 9_999_999)
+    rnd = nanoid.generate(size=6)
     rnd_dir = f'dir_archive_{rnd}'
 
     logger.info(f'Processing {rnd}')
@@ -85,7 +80,7 @@ def generate():
 
         data = process(f'file://{templates}/index.html')
 
-        rmtree(str(temp_extracted))
+        rmtree(str(temp_extracted), ignore_errors=True)
 
         if data is None:
             logger.info(f'Failed to generate pdf "{rnd}" (empty data)')
@@ -98,9 +93,6 @@ def generate():
     except Exception as e:
         logger.error(e)
 
-        try:
-            rmtree(str(temp_extracted))
-        except:
-            pass
+        rmtree(str(temp_extracted), ignore_errors=True)
 
         return abort(500, 'Internal server error')

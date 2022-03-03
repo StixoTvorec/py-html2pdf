@@ -1,6 +1,7 @@
-Flask~=1.1
+Flask~=2.0
 PyQt5~=5.15
 PyQtWebEngine~=5.15
 gunicorn~=20.0
-PyVirtualDisplay~=2.0
-PyYAML~=5.4
+PyVirtualDisplay~=3.0
+PyYAML~=6.0
+nanoid~=2.0

@@ -1,3 +1,4 @@
 # уровень логирования непосредственно приложения
 log_level: info # debug / info / warning / error
 log_file: app.log # файл, куда будет записан лог / если будет пусто, лог будет писаться в stderr
+backend: 
