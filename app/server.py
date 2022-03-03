@@ -28,8 +28,11 @@ app.debug = bool(os.environ.get("DEBUG"))
 
 temp_dir = Path(__file__).parent.parent.joinpath('var')
 
-for _item in temp_dir.iterdir():
-    rmtree(str(_item), ignore_errors=True)
+try:
+    for _item in temp_dir.iterdir():
+        rmtree(str(_item), ignore_errors=True)
+except FileNotFoundError:
+    pass
 
 temp_dir.mkdir(exist_ok=True, parents=True)
 
